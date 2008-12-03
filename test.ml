@@ -1,10 +1,18 @@
 (* A simple unit-testing framework. *)
 
-type test = description * implementation
+type test =
+	| Case  of name * (description * case)
+	| Suite of name * (description * suite)
+	and name        = string
 	and description = string
-	and implementation =
-		| Case of (unit -> unit)
-		| Suite of test list
+	and case        = unit -> unit
+	and suite       = test list
+
+(** Raised when a failure was expected, but not detected. *)
+exception Failure_expected
+
+(** A generic test failure. *)
+exception Failure of string
 
 (** Returns true if and only if the given function raises no exceptions. *)
 let successful fn = try fn (); true with _ -> false
@@ -17,12 +25,6 @@ let assert_true x = assert x
 
 (** Asserts that the given value is false. *)
 let assert_false x = assert (not x)
-
-(** Raised when a failure was expected, but not detected. *)
-exception Failure_expected
-
-(** A generic test failure. *)
-exception Test_failure of string
 
 (** Asserts that the given function raises an exception *)
 (** that matches the given exception matching function. *)
@@ -48,4 +50,4 @@ let assert_raises_any f =
 		()
 
 (** Fails with the given message. *)
-let fail message = raise (Test_failure ("failure: " ^ message))
+let fail message = raise (Failure ("failure: " ^ message))
