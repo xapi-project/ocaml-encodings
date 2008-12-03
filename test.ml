@@ -57,6 +57,31 @@ let string_of_index_entry = function
 
 let string_of_index index = (String.concat "\n" (List.map string_of_index_entry index))
 
+module Format = struct
+
+	type t = Reset | Bright | Dim | Red | Green | Blue | Yellow
+
+	let to_int = function
+		| Reset  ->  0
+		| Bright ->  1
+		| Dim    ->  2
+		| Red    -> 31
+		| Green  -> 32
+		| Yellow -> 33
+		| Blue   -> 34
+
+	let escape = String.make 1 (char_of_int 0x1b)
+
+	let to_string value = string_of_int (to_int value)
+
+	let to_string values =
+		Printf.sprintf "%s[%sm" escape (String.concat ";" (List.map (to_string) values))
+
+	let format values string =
+		(to_string values) ^ string ^ (to_string [Reset])
+
+end open Format
+
 (** Runs the given test. *)
 let run test =
 	let rec run prefix = function
@@ -65,10 +90,10 @@ let run test =
 			print_string ("testing: " ^ prefix ^ name ^ " ");
 			try
 				fn ();
-				print_endline "\t[pass]";
+				print_endline ("\t[" ^ (format [Bright; Green] "pass") ^ "]");
 				(1, 0)
 			with failure ->
-				print_endline "\t[fail]";
+				print_endline ("\t[" ^ (format [Bright; Red] "fail") ^ "]");
 				print_endline "";
 				print_endline (Printexc.to_string failure);
 				print_endline "";
