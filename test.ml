@@ -1,8 +1,8 @@
 (* A simple unit-testing framework. *)
 
 type test =
-	| Case  of name * (description * case)
-	| Suite of name * (description * suite)
+	| Case  of name * description * case
+	| Suite of name * description * suite
 	and name        = string
 	and description = string
 	and case        = unit -> unit
@@ -40,3 +40,7 @@ let assert_raises_any f =
 		()
 
 let fail message = raise (Failure ("failure: " ^ message))
+
+let make_command_line_interface test =
+	(* TODO *)
+	print_endline "done."

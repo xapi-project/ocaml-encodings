@@ -1,6 +1,6 @@
 type test =
-	| Case  of name * (description * case)
-	| Suite of name * (description * suite)
+	| Case  of name * description * case
+	| Suite of name * description * suite
 	and name        = string
 	and description = string
 	and case        = unit -> unit
@@ -36,3 +36,6 @@ val assert_raises_any : (unit -> 'a) -> unit
 
 (** Fails with the given message. *)
 val fail : string -> 'a
+
+(** Makes the given test accessible from the command-line. *)
+val make_command_line_interface : test -> unit
