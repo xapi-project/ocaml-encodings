@@ -8,26 +8,18 @@ type test =
 	and case        = unit -> unit
 	and suite       = test list
 
-(** Raised when a failure was expected, but not detected. *)
 exception Failure_expected
 
-(** A generic test failure. *)
 exception Failure of string
 
-(** Returns true if and only if the given function raises no exceptions. *)
 let successful fn = try fn (); true with _ -> false
 
-(** Asserts that the given values are logically equal. *)
 let assert_equal x y = assert (x = y)
 
-(** Asserts that the given value is true. *)
 let assert_true x = assert x
 
-(** Asserts that the given value is false. *)
 let assert_false x = assert (not x)
 
-(** Asserts that the given function raises an exception *)
-(** that matches the given exception matching function. *)
 let assert_raises_match exception_match fn =
 	try
 		fn ();
@@ -37,11 +29,9 @@ let assert_raises_match exception_match fn =
 			then raise failure
 			else ()
 
-(** Asserts that the given function raises the given exception. *)
 let assert_raises expected =
 	assert_raises_match (function exn -> exn = expected)
 
-(** Asserts that the given function fails with any exception. *)
 let assert_raises_any f =
 	try
 		f ();
@@ -49,5 +39,4 @@ let assert_raises_any f =
 	with failure ->
 		()
 
-(** Fails with the given message. *)
 let fail message = raise (Failure ("failure: " ^ message))
