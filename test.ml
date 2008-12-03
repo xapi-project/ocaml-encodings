@@ -95,7 +95,7 @@ let run test =
 			with failure ->
 				print_endline ("\t[" ^ (format [Bright; Red] "fail") ^ "]");
 				print_endline "";
-				print_endline (Printexc.to_string failure);
+				print_endline (format [Bright] (Printexc.to_string failure));
 				print_endline "";
 				(0, 1)
 		end
@@ -147,8 +147,8 @@ let make_command_line_interface test =
 			print_endline "";
 			let passed, failed = run test in
 			print_endline "";
-			print_endline ("tested: " ^ (string_of_int (passed + failed)));
-			print_endline ("passed: " ^ (string_of_int passed));
-			print_endline ("failed: " ^ (string_of_int failed));
+			print_endline ("tested: [" ^ (format [Bright] (string_of_int (passed + failed))) ^ "]");
+			print_endline ("passed: [" ^ (format [Bright] (string_of_int passed)) ^ "]");
+			print_endline ("failed: [" ^ (format [Bright] (string_of_int failed)) ^ "]");
 			print_endline "";
 		end
