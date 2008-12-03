@@ -3,7 +3,7 @@ open Test
 module Numbers = struct
 
 	let add = Case begin "add",
-		"tests that adding one number to\
+		"Tests that adding one number to \
 		 another gives the correct result.",
 		fun () ->
 			assert_equal (Example.Numbers.add 0 0) 0;
@@ -12,7 +12,7 @@ module Numbers = struct
 	end
 
 	let sub = Case begin "sub",
-		"tests that subtracting one number from\
+		"Tests that subtracting one number from \
 		 another gives the correct result.",
 		fun () ->
 			assert_equal (Example.Numbers.sub 0 0) 0;
@@ -21,7 +21,7 @@ module Numbers = struct
 	end
 
 	let tests = Suite begin "Numbers",
-		"tests the Numbers module",
+		"Tests the Numbers module.",
 		[add; sub;]
 	end
 
@@ -30,7 +30,7 @@ end
 module Strings = struct
 
 	let upper = Case begin "upper",
-		"tests that strings convert to upper-case correctly.",
+		"Tests that strings convert to upper-case correctly.",
 		fun () ->
 			assert_equal (Example.Strings.upper "string") "STRING";
 			assert_equal (Example.Strings.upper "String") "STRING";
@@ -38,7 +38,7 @@ module Strings = struct
 	end
 
 	let lower = Case begin "lower",
-		"tests that strings convert to lower-case correctly.",
+		"Tests that strings convert to lower-case correctly.",
 		fun () ->
 			assert_equal (Example.Strings.lower "string") "string";
 			assert_equal (Example.Strings.lower "String") "string";
@@ -46,14 +46,14 @@ module Strings = struct
 	end
 
 	let tests = Suite begin "Strings",
-		"tests the Strings module",
+		"Tests the Strings module.",
 		[upper; lower;]
 	end
 
 end
 
 let tests = Suite begin "Example",
-	"tests the Example module",
+	"Tests the Example module.",
 	[
 		Numbers.tests;
 		Strings.tests;
