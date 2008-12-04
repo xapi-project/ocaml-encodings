@@ -1,3 +1,7 @@
+(* A unit testing framework for OCaml.                        *)
+(* Author: Jonathan Knowles                                   *)
+(* Copyright: 2008 Citrix Systems Research & Development Ltd. *)
+
 type test =
 	| Case  of name * description * case
 	| Suite of name * description * suite

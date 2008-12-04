@@ -1,4 +1,6 @@
-(* === A simple unit-testing framework. === *)
+(* A unit testing framework for OCaml.                        *)
+(* Author: Jonathan Knowles                                   *)
+(* Copyright: 2008 Citrix Systems Research & Development Ltd. *)
 
 open Printf
 
@@ -166,7 +168,7 @@ let arguments =
 (** For now, ignore anonymous arguments. *)
 let process_anonymous_argument string = ()
 
-(** For now, have a blank usage message. *)
+(** For now, present a blank usage message. *)
 let usage = ""
 
 let make_command_line_interface test =
