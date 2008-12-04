@@ -66,7 +66,11 @@ let string_of_style value = string_of_int (int_of_style value)
 
 let escape = String.make 1 (char_of_int 0x1b)
 
+(** Whether or not to disable pretty-printing. *)
+let ugly = ref false
+
 let style values =
+	if !ugly then "" else
 	sprintf "%s[%sm" escape (String.concat ";" (List.map (string_of_style) values))
 
 (* === Indices === *)
@@ -143,10 +147,21 @@ let run test =
 	printf "\n";
 	let passed, failed = run test "" in
 	printf "\n";
-	printf "tested: [%s%i%s]\n" (style [Bold]) (passed + failed) (style [Reset]);
-	printf "passed: [%s%i%s]\n" (style [Bold]) (passed         ) (style [Reset]);
-	printf "failed: [%s%i%s]\n" (style [Bold]) (         failed) (style [Reset]);
+	printf "tested [%s%i%s]\n" (style [Bold]) (passed + failed) (style [Reset]);
+	printf "passed [%s%i%s]\n" (style [Bold]) (passed         ) (style [Reset]);
+	printf "failed [%s%i%s]\n" (style [Bold]) (         failed) (style [Reset]);
 	printf "\n"
+
+(* === Factories === *)
+
+let make_test_case name description case =
+	Case (name, description, case)
+
+let make_test_suite name description suite =
+	Suite (name, description, suite)
+
+let make_module_test_suite name suite =
+	Suite (name, sprintf "Tests the %s module." name, suite)
 
 (* === Command line interface === *)
 
@@ -163,6 +178,9 @@ let arguments =
 	"-name",
 		Arg.String (fun name' -> name := Some name'),
 		"runs the test with the given name";
+	"-ugly",
+		Arg.Set ugly,
+		"disables pretty-printing";
 ]
 
 (** For now, ignore anonymous arguments. *)
@@ -172,6 +190,8 @@ let process_anonymous_argument string = ()
 let usage = ""
 
 let make_command_line_interface test =
+	(* TODO: Use the correct exit code depending on the number of failures. *)
+	(* TODO: Use stderr in appropriate places when presented with failures. *)
 	Arg.parse arguments process_anonymous_argument usage;
 	let index = index_of_test test in
 	if !list

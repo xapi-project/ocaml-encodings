@@ -2,13 +2,11 @@
 (* Author: Jonathan Knowles                                   *)
 (* Copyright: 2008 Citrix Systems Research & Development Ltd. *)
 
-type test =
-	| Case  of name * description * case
-	| Suite of name * description * suite
-	and name        = string
-	and description = string
-	and case        = unit -> unit
-	and suite       = test list
+type test
+type name        = string
+type description = string
+type case        = unit -> unit
+type suite       = test list
 
 (** Raised when a failure was expected, but not detected. *)
 exception Failure_expected
@@ -40,6 +38,15 @@ val assert_raises_any : (unit -> 'a) -> unit
 
 (** Fails with the given message. *)
 val fail : string -> 'a
+
+(** Makes a test case. *)
+val make_test_case : name -> description -> case -> test
+
+(** Makes a test suite. *)
+val make_test_suite : name -> description -> suite -> test
+
+(** Makes a module test suite with a default description. *)
+val make_module_test_suite : name -> suite -> test
 
 (** Makes the given test accessible from the command-line. *)
 val make_command_line_interface : test -> unit
