@@ -1,4 +1,6 @@
-(* A simple unit-testing framework. *)
+(* === A simple unit-testing framework. === *)
+
+(* === Types === *)
 
 type test =
 	| Case  of name * description * case
@@ -11,6 +13,8 @@ type test =
 exception Failure_expected
 
 exception Failure of string
+
+(* === Checks and assertions === *)
 
 let successful fn = try fn (); true with _ -> false
 
@@ -41,6 +45,28 @@ let assert_raises_any f =
 
 let fail message = raise (Failure ("failure: " ^ message))
 
+(* === Console styles === *)
+
+type style = Reset | Bold | Dim | Red | Green | Blue | Yellow
+
+let int_of_style = function
+	| Reset  ->  0
+	| Bold   ->  1
+	| Dim    ->  2
+	| Red    -> 31
+	| Green  -> 32
+	| Yellow -> 33
+	| Blue   -> 34
+
+let string_of_style value = string_of_int (int_of_style value)
+
+let escape = String.make 1 (char_of_int 0x1b)
+
+let style values =
+	Printf.sprintf "%s[%sm" escape (String.concat ";" (List.map (string_of_style) values))
+
+(* === Indices === *)
+
 let build_index =
 	let rec build prefix = function
 		| Case (name, description, case) ->
@@ -52,35 +78,14 @@ let build_index =
 	build ""
 
 let string_of_index_entry = function
-	| (key, Case  (_, description, _)) -> key ^ "\n    " ^ description
-	| (key, Suite (_, description, _)) -> key ^ "\n    " ^ description
+	| (key, Case  (_, description, _))
+	| (key, Suite (_, description, _))
+	-> (style [Bold]) ^ key ^ (style [Reset]) ^ "\n    " ^ description
 
-let string_of_index index = (String.concat "\n" (List.map string_of_index_entry index))
+let string_of_index index =
+	"\n" ^ (String.concat "\n" (List.map string_of_index_entry index)) ^ "\n"
 
-module Format = struct
-
-	type t = Reset | Bright | Dim | Red | Green | Blue | Yellow
-
-	let to_int = function
-		| Reset  ->  0
-		| Bright ->  1
-		| Dim    ->  2
-		| Red    -> 31
-		| Green  -> 32
-		| Yellow -> 33
-		| Blue   -> 34
-
-	let escape = String.make 1 (char_of_int 0x1b)
-
-	let to_string value = string_of_int (to_int value)
-
-	let to_string values =
-		Printf.sprintf "%s[%sm" escape (String.concat ";" (List.map (to_string) values))
-
-	let format values string =
-		(to_string values) ^ string ^ (to_string [Reset])
-
-end open Format
+(* === Runners === *)
 
 (** Runs the given test. *)
 let run test =
@@ -90,12 +95,12 @@ let run test =
 			print_string ("testing: " ^ prefix ^ name ^ " ");
 			try
 				fn ();
-				print_endline ("\t[" ^ (format [Bright; Green] "pass") ^ "]");
+				print_endline ("\t[" ^ (style [Bold; Green]) ^ "pass" ^ (style [Reset]) ^ "]");
 				(1, 0)
 			with failure ->
-				print_endline ("\t[" ^ (format [Bright; Red] "fail") ^ "]");
+				print_endline ("\t[" ^ (style [Bold; Red]) ^ "fail" ^ (style [Reset]) ^ "]");
 				print_endline "";
-				print_endline (format [Bright] (Printexc.to_string failure));
+				print_endline ((style [Bold]) ^ (Printexc.to_string failure) ^ (style [Reset]));
 				print_endline "";
 				(0, 1)
 		end
@@ -113,42 +118,42 @@ let run test =
 			(!passed, !failed)
 		end
 	in
-	run "" test
+	print_endline "";
+	let passed, failed = run "" test in
+	print_endline "";
+	print_endline ("tested: [" ^ (style [Bold]) ^ (string_of_int (passed + failed)) ^ (style [Reset]) ^ "]");
+	print_endline ("passed: [" ^ (style [Bold]) ^ (string_of_int (passed         )) ^ (style [Reset]) ^ "]");
+	print_endline ("failed: [" ^ (style [Bold]) ^ (string_of_int (         failed)) ^ (style [Reset]) ^ "]");
+	print_endline ""
 
-let anon_function string = ()
-let usage = ""
+(* === Command line interface === *)
 
+(** Argument values. *)
 let list = ref false
-let name = ref ""
+let name = ref None
 
+(** Argument definitions. *)
 let arguments =
 [
-	"-list", Arg.Set list, "lists the tests available in this module.";
-	"-name", Arg.Set_string name, "runs the test with the given name.";
+	"-list",
+		Arg.Set list,
+		"lists the tests available in this module";
+	"-name",
+		Arg.String (fun name' -> name := Some name'),
+		"runs the test with the given name";
 ]
 
+(** For now, ignore anonymous arguments. *)
+let process_anonymous_argument string = ()
+
+(** For now, have a blank usage message. *)
+let usage = ""
+
 let make_command_line_interface test =
-	Arg.parse arguments anon_function usage;
-	let index = build_index test in	
-	if !list then
-		begin
-			print_endline "";
-			print_endline (string_of_index index);
-			print_endline "";
-			flush stdout
-		end
-	else
-		begin
-			let test = if (!name = "") then
-				test
-			else
-				List.assoc !name index
-			in
-			print_endline "";
-			let passed, failed = run test in
-			print_endline "";
-			print_endline ("tested: [" ^ (format [Bright] (string_of_int (passed + failed))) ^ "]");
-			print_endline ("passed: [" ^ (format [Bright] (string_of_int passed)) ^ "]");
-			print_endline ("failed: [" ^ (format [Bright] (string_of_int failed)) ^ "]");
-			print_endline "";
-		end
+	Arg.parse arguments process_anonymous_argument usage;
+	let index = build_index test in
+	if !list
+	then print_endline (string_of_index index)
+	else match !name with
+		| Some name -> run (List.assoc name index)
+		| None -> run test
