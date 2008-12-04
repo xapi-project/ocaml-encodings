@@ -1,5 +1,7 @@
 (* === A simple unit-testing framework. === *)
 
+open Printf
+
 (* === Types === *)
 
 type test =
@@ -63,11 +65,11 @@ let string_of_style value = string_of_int (int_of_style value)
 let escape = String.make 1 (char_of_int 0x1b)
 
 let style values =
-	Printf.sprintf "%s[%sm" escape (String.concat ";" (List.map (string_of_style) values))
+	sprintf "%s[%sm" escape (String.concat ";" (List.map (string_of_style) values))
 
 (* === Indices === *)
 
-let build_index =
+let index_of_test =
 	let rec build prefix = function
 		| Case (name, description, case) ->
 			[(prefix ^ name, Case (name, description, case))]
@@ -85,46 +87,64 @@ let string_of_index_entry = function
 let string_of_index index =
 	"\n" ^ (String.concat "\n" (List.map string_of_index_entry index)) ^ "\n"
 
+let max x y = if x > y then x else y
+
+let longest_key_of_index index =
+	List.fold_left
+		(fun longest_key (key, _) ->
+			max longest_key (String.length key))
+		0 index
+
 (* === Runners === *)
+
+type test_result = passed * failed
+	and passed = int
+	and failed = int
+
+let add_result (passed, failed) (passed', failed') =
+	(passed + passed', failed + failed')
+
+(** Runs the given test with the given name prefix. *)
+let rec run (test : test) (name_prefix : string) : test_result =
+	match test with
+		| Case (name, description, fn) ->
+			run_case (name_prefix ^ name, description, fn)
+		| Suite (name, description, tests) ->
+			run_suite (name_prefix ^ name, description, tests)
+
+(** Runs the given test case. *)
+and run_case (name, description, fn) =
+	printf "testing %s" name;
+	flush stdout;
+	try
+		fn ();
+		printf "\t[%s%s%s]\n" (style [Bold; Green]) "pass" (style [Reset]);
+		(1, 0)
+	with failure ->
+		printf "\t[%s%s%s]\n" (style [Bold; Red]) "fail" (style [Reset]);
+		printf "\n%s%s%s\n\n" (style [Bold]) (Printexc.to_string failure) (style [Reset]);
+		(0, 1)
+
+(** Runs the given test suite. *)
+and run_suite (name, description, tests) =
+	printf "%sopening %s%s\n" (style [Dim]) name (style [Reset]);
+	flush stdout;
+	let result = List.fold_left (
+		fun accumulating_result test ->
+			add_result accumulating_result (run test (name ^ "."))
+	) (0, 0) tests in
+	printf "%sclosing %s%s\n" (style [Dim]) name (style [Reset]);
+	result
 
 (** Runs the given test. *)
 let run test =
-	let rec run prefix = function
-	| Case (name, description, fn) ->
-		begin
-			print_string ("testing: " ^ prefix ^ name ^ " ");
-			try
-				fn ();
-				print_endline ("\t[" ^ (style [Bold; Green]) ^ "pass" ^ (style [Reset]) ^ "]");
-				(1, 0)
-			with failure ->
-				print_endline ("\t[" ^ (style [Bold; Red]) ^ "fail" ^ (style [Reset]) ^ "]");
-				print_endline "";
-				print_endline ((style [Bold]) ^ (Printexc.to_string failure) ^ (style [Reset]));
-				print_endline "";
-				(0, 1)
-		end
-	| Suite (name, description, tests) ->
-		begin
-			print_string ("opening: " ^ prefix ^ name ^ "\n");
-			let passed = ref 0 in
-			let failed = ref 0 in
-			List.iter
-				(fun test ->
-					let (passed', failed') = run (prefix ^ name ^ ".") test in
-					passed := !passed + passed';
-					failed := !failed + failed')
-				tests;
-			(!passed, !failed)
-		end
-	in
-	print_endline "";
-	let passed, failed = run "" test in
-	print_endline "";
-	print_endline ("tested: [" ^ (style [Bold]) ^ (string_of_int (passed + failed)) ^ (style [Reset]) ^ "]");
-	print_endline ("passed: [" ^ (style [Bold]) ^ (string_of_int (passed         )) ^ (style [Reset]) ^ "]");
-	print_endline ("failed: [" ^ (style [Bold]) ^ (string_of_int (         failed)) ^ (style [Reset]) ^ "]");
-	print_endline ""
+	printf "\n";
+	let passed, failed = run test "" in
+	printf "\n";
+	printf "tested: [%s%i%s]\n" (style [Bold]) (passed + failed) (style [Reset]);
+	printf "passed: [%s%i%s]\n" (style [Bold]) (passed         ) (style [Reset]);
+	printf "failed: [%s%i%s]\n" (style [Bold]) (         failed) (style [Reset]);
+	printf "\n"
 
 (* === Command line interface === *)
 
@@ -151,9 +171,10 @@ let usage = ""
 
 let make_command_line_interface test =
 	Arg.parse arguments process_anonymous_argument usage;
-	let index = build_index test in
+	let index = index_of_test test in
 	if !list
 	then print_endline (string_of_index index)
 	else match !name with
 		| Some name -> run (List.assoc name index)
-		| None -> run test
+		| None -> run test;
+	flush stdout
