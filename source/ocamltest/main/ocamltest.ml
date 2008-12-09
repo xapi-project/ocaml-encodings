@@ -110,40 +110,43 @@ type test_result = passed * failed
 let add_result (passed, failed) (passed', failed') =
 	(passed + passed', failed + failed')
 
-(** Runs the given test with the given name prefix. *)
-let rec run (test : test) (name_prefix : string) : test_result =
-	match test with
-		| Case (name, description, fn) ->
-			run_case (name_prefix ^ name, description, fn)
-		| Suite (name, description, tests) ->
-			run_suite (name_prefix ^ name, description, tests)
-
-(** Runs the given test case. *)
-and run_case (name, description, fn) =
-	printf "testing %s" name;
-	flush stdout;
-	try
-		fn ();
-		printf "\t[%s%s%s]\n" (style [Bold; Green]) "pass" (style [Reset]);
-		(1, 0)
-	with failure ->
-		printf "\t[%s%s%s]\n" (style [Bold; Red]) "fail" (style [Reset]);
-		printf "\n%s%s%s\n\n" (style [Bold]) (Printexc.to_string failure) (style [Reset]);
-		(0, 1)
-
-(** Runs the given test suite. *)
-and run_suite (name, description, tests) =
-	printf "%sopening %s%s\n" (style [Dim]) name (style [Reset]);
-	flush stdout;
-	let result = List.fold_left (
-		fun accumulating_result test ->
-			add_result accumulating_result (run test (name ^ "."))
-	) (0, 0) tests in
-	printf "%sclosing %s%s\n" (style [Dim]) name (style [Reset]);
-	result
-
 (** Runs the given test. *)
 let run test =
+
+	let longest_key_width = longest_key_of_index (index_of_test test) in
+
+	(** Runs the given test with the given name prefix. *)
+	let rec run (test : test) (name_prefix : string) : test_result =
+		match test with
+			| Case (name, description, fn) ->
+				run_case (name_prefix ^ name, description, fn)
+			| Suite (name, description, tests) ->
+				run_suite (name_prefix ^ name, description, tests)
+
+	(** Runs the given test case. *)
+	and run_case (name, description, fn) =
+		printf "testing %s" name;
+		flush stdout;
+		let padding = String.make (longest_key_width - (String.length name)) ' ' in
+		try
+			fn ();
+			printf "%s\t[%s%s%s]\n" padding (style [Bold; Green]) "pass" (style [Reset]);
+			(1, 0)
+		with failure ->
+			printf "%s\t[%s%s%s]\n" padding (style [Bold; Red]) "fail" (style [Reset]);
+			printf "\n%s%s%s\n\n" (style [Bold]) (Printexc.to_string failure) (style [Reset]);
+			(0, 1)
+
+	(** Runs the given test suite. *)
+	and run_suite (name, description, tests) =
+		flush stdout;
+		let result = List.fold_left (
+			fun accumulating_result test ->
+				add_result accumulating_result (run test (name ^ "."))
+		) (0, 0) tests in
+		result
+	in
+
 	printf "\n";
 	let passed, failed = run test "" in
 	printf "\n";
