@@ -1,0 +1,3 @@
+<build/**>: precious
+<source/*/{main,test}>: include
+<**/*>: dtypes
