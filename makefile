@@ -1,4 +1,4 @@
-BUILD=ocamlbuild -no-links
+BUILD=ocamlbuild -no-links -I source
 
 all: target
 
