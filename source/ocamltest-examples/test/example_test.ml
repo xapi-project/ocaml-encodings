@@ -1,4 +1,4 @@
-open Test
+open Ocamltest
 
 module Numbers = struct
 
