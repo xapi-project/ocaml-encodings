@@ -153,7 +153,8 @@ let run test =
 	printf "tested [%s%i%s]\n" (style [Bold]) (passed + failed) (style [Reset]);
 	printf "passed [%s%i%s]\n" (style [Bold]) (passed         ) (style [Reset]);
 	printf "failed [%s%i%s]\n" (style [Bold]) (         failed) (style [Reset]);
-	printf "\n"
+	printf "\n";
+	passed, failed
 
 (* === Factories === *)
 
@@ -193,13 +194,22 @@ let process_anonymous_argument string = ()
 let usage = ""
 
 let make_command_line_interface test =
-	(* TODO: Use the correct exit code depending on the number of failures. *)
 	(* TODO: Use stderr in appropriate places when presented with failures. *)
 	Arg.parse arguments process_anonymous_argument usage;
 	let index = index_of_test test in
 	if !list
-	then print_endline (string_of_index index)
-	else match !name with
-		| Some name -> run (List.assoc name index)
-		| None -> run test;
-	flush stdout
+	then
+		begin
+			print_endline (string_of_index index);
+			flush stdout
+		end
+	else
+		begin
+			let passed, failed = run
+				(match !name with
+					| Some name -> (List.assoc name index)
+					| None -> test)
+			in
+			flush stdout;
+			exit (if failed = 0 then 0 else 1)
+		end
