@@ -1,5 +1,5 @@
 open Ocamltest
-open Encodings
+open Encodings_private
 
 (* === Mock exceptions  ==================================================== *)
 
