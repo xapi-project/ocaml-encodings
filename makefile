@@ -1,4 +1,4 @@
-build_command = ocamlbuild -no-links -I source -Xs _build,target
+build_command = ocamlbuild -r -no-links -I source -Xs _build,target
 
 # Build the given target if (and only if) it requires building.
 build = $(build_command) $1
