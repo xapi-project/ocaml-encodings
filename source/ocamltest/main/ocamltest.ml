@@ -134,7 +134,11 @@ let run test =
 			(1, 0)
 		with failure ->
 			printf "%s\t[%s%s%s]\n" padding (style [Bold; Red]) "fail" (style [Reset]);
-			printf "\n%s%s%s\n\n" (style [Bold]) (Printexc.to_string failure) (style [Reset]);
+			printf "\n%s%s\n%s%s\n"
+				(style [Bold])
+				(Printexc.to_string failure)
+				(Printexc.get_backtrace ())
+				(style [Reset]);
 			(0, 1)
 
 	(** Runs the given test suite. *)
@@ -147,6 +151,7 @@ let run test =
 		result
 	in
 
+	Printexc.record_backtrace true;
 	printf "\n";
 	let passed, failed = run test "" in
 	printf "\n";
