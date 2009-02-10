@@ -11,9 +11,6 @@ type suite       = test list
 (** Raised when a failure was expected, but not detected. *)
 exception Failure_expected
 
-(** A generic test failure. *)
-exception Failure of string
-
 (** Returns true if and only if the given function raises no exceptions. *)
 val successful : (unit -> 'a) -> bool
 
@@ -36,8 +33,11 @@ val assert_raises : exn -> (unit -> 'a) -> unit
 (** Asserts that the given function fails with any exception. *)
 val assert_raises_any : (unit -> 'a) -> unit
 
-(** Fails with the given message. *)
-val fail : string -> 'a
+(** Indicates that the current test has failed, with the given message. *)
+val fail : string -> unit
+
+(** Indicates that the current test should be skipped, with the given message. *)
+val skip : string -> unit
 
 (** Makes a test case. *)
 val make_test_case : name -> description -> case -> test

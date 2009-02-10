@@ -16,7 +16,9 @@ type test =
 
 exception Failure_expected
 
-exception Failure of string
+exception Fail of string
+
+exception Skip of string
 
 (* === Checks and assertions === *)
 
@@ -47,16 +49,20 @@ let assert_raises_any f =
 	with failure ->
 		()
 
-let fail message = raise (Failure ("failure: " ^ message))
+let fail message = raise (Fail ("failed: " ^ message))
+
+let skip message = raise (Skip ("skipped: " ^ message))
 
 (* === Console styles === *)
 
-type style = Reset | Bold | Dim | Red | Green | Blue | Yellow
+type style = Reset | Bold | Reverse | Dim | Grey | Red | Green | Blue | Yellow | Black
 
 let int_of_style = function
 	| Reset  ->  0
 	| Bold   ->  1
 	| Dim    ->  2
+	| Reverse->  7
+	| Black  -> 30
 	| Red    -> 31
 	| Green  -> 32
 	| Yellow -> 33
@@ -103,12 +109,16 @@ let longest_key_of_index index =
 
 (* === Runners === *)
 
-type test_result = passed * failed
-	and passed = int
-	and failed = int
+type test_result = {passed: int; failed: int; skipped: int}
 
-let add_result (passed, failed) (passed', failed') =
-	(passed + passed', failed + failed')
+let add_result
+	{passed = p1     ; failed = f1     ; skipped = s1     }
+	{passed =      p2; failed =      f2; skipped =      s2} =
+	{passed = p1 + p2; failed = f1 + f2; skipped = s1 + s2}
+
+let singleton_pass = {passed = 1; failed = 0; skipped = 0}
+let singleton_fail = {passed = 0; failed = 1; skipped = 0}
+let singleton_skip = {passed = 0; failed = 0; skipped = 1}
 
 (** Runs the given test. *)
 let run test =
@@ -128,18 +138,29 @@ let run test =
 		printf "testing %s" name;
 		flush stdout;
 		let padding = String.make (longest_key_width - (String.length name)) ' ' in
+		let status colour name = 
+			sprintf "%s\t[%s%s%s]" padding (style [colour; Bold]) name (style [Reset]) in
 		try
 			fn ();
-			printf "%s\t[%s%s%s]\n" padding (style [Bold; Green]) "pass" (style [Reset]);
-			(1, 0)
-		with failure ->
-			printf "%s\t[%s%s%s]\n" padding (style [Bold; Red]) "fail" (style [Reset]);
+			print_endline (status Green "pass");
+			singleton_pass
+		with
+		| Skip (message) ->
+			print_endline (status Blue "skip");
+			printf "\n%s%s%s\n\n" (style [Bold]) message (style [Reset]);
+			singleton_skip
+		| Fail (message) ->
+			print_endline (status Red "fail");
+			printf "\n%s%s%s\n\n" (style [Bold]) message (style [Reset]);
+			singleton_fail
+		| failure ->
+			print_endline (status Red "fail");
 			printf "\n%s%s\n%s%s\n"
 				(style [Bold])
 				(Printexc.to_string failure)
 				(Printexc.get_backtrace ())
 				(style [Reset]);
-			(0, 1)
+			singleton_fail
 
 	(** Runs the given test suite. *)
 	and run_suite (name, description, tests) =
@@ -147,19 +168,20 @@ let run test =
 		let result = List.fold_left (
 			fun accumulating_result test ->
 				add_result accumulating_result (run test (name ^ "."))
-		) (0, 0) tests in
+		) {passed = 0; failed = 0; skipped = 0} tests in
 		result
 	in
 
 	Printexc.record_backtrace true;
 	printf "\n";
-	let passed, failed = run test "" in
+	let {passed = passed; failed = failed; skipped = skipped} = run test "" in
 	printf "\n";
-	printf "tested [%s%i%s]\n" (style [Bold]) (passed + failed) (style [Reset]);
-	printf "passed [%s%i%s]\n" (style [Bold]) (passed         ) (style [Reset]);
-	printf "failed [%s%i%s]\n" (style [Bold]) (         failed) (style [Reset]);
+	printf " tested [%s%i%s]\n" (style [Bold]) (passed + failed + skipped) (style [Reset]);
+	printf " passed [%s%i%s]\n" (style [Bold]) (passed                   ) (style [Reset]);
+	printf " failed [%s%i%s]\n" (style [Bold]) (         failed          ) (style [Reset]);
+	printf "skipped [%s%i%s]\n" (style [Bold]) (                  skipped) (style [Reset]);
 	printf "\n";
-	passed, failed
+	{passed = passed; failed = failed; skipped = skipped}
 
 (* === Factories === *)
 
@@ -210,7 +232,7 @@ let make_command_line_interface test =
 		end
 	else
 		begin
-			let passed, failed = run
+			let {passed = passed; failed = failed; skipped = skipped} = run
 				(match !name with
 					| Some name -> (List.assoc name index)
 					| None -> test)
