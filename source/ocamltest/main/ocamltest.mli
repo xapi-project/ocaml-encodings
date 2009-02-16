@@ -2,11 +2,16 @@
 (* Author: Jonathan Knowles                                   *)
 (* Copyright: 2008 Citrix Systems Research & Development Ltd. *)
 
-type test
-type name        = string
-type description = string
-type case        = unit -> unit
-type suite       = test list
+type test =
+	| Case  of name * description * case
+	| Suite of name * description * suite
+	and name        = string
+	and description = string
+	and case        = unit -> unit
+	and suite       = test list
+
+(** Indicates that the current test should be skipped. *)
+exception Skip of string
 
 (** Raised when a failure was expected, but not detected. *)
 exception Failure_expected
