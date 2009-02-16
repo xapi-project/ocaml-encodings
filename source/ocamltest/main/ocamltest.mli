@@ -14,8 +14,28 @@ exception Failure_expected
 (** Returns true if and only if the given function raises no exceptions. *)
 val successful : (unit -> 'a) -> bool
 
-(** Asserts that the given values are logically equal. *)
-val assert_equal : 'a -> 'a -> unit
+(** Asserts that the given values are logically equal. If the values *)
+(** are not equal, this function uses the optional string conversion *)
+(** function to generate a failure message with the non-equal values.*)
+val assert_equal : ?to_string:('a -> string) -> 'a -> 'a -> unit
+
+(** Asserts that the given Boolean values are equal. *)
+val assert_equal_bool : bool -> bool -> unit
+
+(** Asserts that the given floating-point values are equal. *)
+val assert_equal_float : float -> float -> unit
+
+(** Asserts that the given integer values are equal. *)
+val assert_equal_int : int -> int -> unit
+
+(** Asserts that the given 32-bit integer values are equal. *)
+val assert_equal_int32 : int32 -> int32 -> unit
+
+(** Asserts that the given 64-bit integer values are equal. *)
+val assert_equal_int64 : int64 -> int64 -> unit
+
+(** Asserts that the given strings are equal. *)
+val assert_equal_string : string -> string -> unit
 
 (** Asserts that the given value is true. *)
 val assert_true : bool -> unit

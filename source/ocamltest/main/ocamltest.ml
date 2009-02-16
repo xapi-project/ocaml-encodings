@@ -15,16 +15,33 @@ type test =
 	and suite       = test list
 
 exception Failure_expected
-
 exception Fail of string
-
 exception Skip of string
 
-(* === Checks and assertions === *)
+(* === Equality assertions === *)
+
+let assert_equal ?to_string x y =
+	if not (x = y) then raise
+	(Fail
+		(match to_string with
+			| None ->
+				"found different values where equal values were expected."
+			| Some to_string -> sprintf
+				"found different values where equal values were expected: %s != %s."
+				(to_string x) (to_string y)
+		)
+	)
+
+let assert_equal_bool   = assert_equal ~to_string:string_of_bool
+let assert_equal_float  = assert_equal ~to_string:string_of_float
+let assert_equal_int    = assert_equal ~to_string:string_of_int
+let assert_equal_int32  = assert_equal ~to_string:Int32.to_string
+let assert_equal_int64  = assert_equal ~to_string:Int64.to_string
+let assert_equal_string = assert_equal ~to_string:(fun s -> s)
+
+(* === Other assertions === *)
 
 let successful fn = try fn (); true with _ -> false
-
-let assert_equal x y = assert (x = y)
 
 let assert_true x = assert x
 
@@ -49,9 +66,9 @@ let assert_raises_any f =
 	with failure ->
 		()
 
-let fail message = raise (Fail ("failed: " ^ message))
+let fail message = raise (Fail (message))
 
-let skip message = raise (Skip ("skipped: " ^ message))
+let skip message = raise (Skip (message))
 
 (* === Console styles === *)
 
@@ -182,15 +199,15 @@ let run test =
 		with
 			| Skip (message) ->
 				display_finish_message Blue "skip";
-				printf "\n%s\n\n" message;
+				printf "\nskipped: %s\n\n" message;
 				singleton_skip
 			| Fail (message) ->
 				display_finish_message Red "fail";
-				printf "\n%s\n\n" message;
+				printf "\nfailed: %s\n\n" message;
 				singleton_fail
 			| failure ->
 				display_finish_message Red "fail";
-				printf "\n%s\n%s\n"
+				printf "\nfailed: %s\n%s\n"
 					(Printexc.to_string failure)
 					(Printexc.get_backtrace ());
 				singleton_fail
