@@ -39,6 +39,12 @@ val fail : string -> unit
 (** Indicates that the current test should be skipped, with the given message. *)
 val skip : string -> unit
 
+(** Prints a debugging message, followed by a newline character. *)
+val print_endline : string -> unit
+
+(** Prints a debugging message. *)
+val print_string : string -> unit
+
 (** Makes a test case. *)
 val make_test_case : name -> description -> case -> test
 

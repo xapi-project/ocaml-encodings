@@ -55,7 +55,7 @@ let skip message = raise (Skip ("skipped: " ^ message))
 
 (* === Console styles === *)
 
-type style = Reset | Bold | Reverse | Dim | Grey | Red | Green | Blue | Yellow | Black
+type style = Reset | Bold | Reverse | Dim | Red | Green | Blue | Yellow | Black
 
 let int_of_style = function
 	| Reset  ->  0
@@ -120,6 +120,17 @@ let singleton_pass = {passed = 1; failed = 0; skipped = 0}
 let singleton_fail = {passed = 0; failed = 1; skipped = 0}
 let singleton_skip = {passed = 0; failed = 0; skipped = 1}
 
+(** True if (and only if) the currently-executing  *)
+(** test has generated one or more debug messages. *)
+let debugging = ref false
+
+let start_debugging () =
+	if not !debugging then
+	begin
+		debugging := true;
+		print_endline "\n"
+	end
+
 (** Runs the given test. *)
 let run test =
 
@@ -135,32 +146,54 @@ let run test =
 
 	(** Runs the given test case. *)
 	and run_case (name, description, fn) =
-		printf "testing %s" name;
-		flush stdout;
-		let padding = String.make (longest_key_width - (String.length name)) ' ' in
-		let status colour name = 
-			sprintf "%s\t[%s%s%s]" padding (style [colour; Bold]) name (style [Reset]) in
+
+		let pre_status_padding =
+			String.make (longest_key_width - (String.length name)) ' ' in
+
+		let generate_status_string colour result =
+			sprintf "%s\t[%s%s%s]" pre_status_padding (style [colour; Bold]) result (style [Reset])
+		in
+
+		let describe_current_test () =
+			printf "%stesting %s%s" (style [Bold]) name (style [Reset]);
+			flush stdout
+		in
+
+		let display_start_message () =
+			describe_current_test ();
+			debugging := false
+		in
+
+		let display_finish_message colour result =
+			if !debugging
+			then
+				begin
+					print_endline "";
+					describe_current_test ();
+				end;
+			print_endline (generate_status_string colour result)
+		in
+
+		display_start_message ();
 		try
 			fn ();
-			print_endline (status Green "pass");
+			display_finish_message Green "pass";
 			singleton_pass
 		with
-		| Skip (message) ->
-			print_endline (status Blue "skip");
-			printf "\n%s%s%s\n\n" (style [Bold]) message (style [Reset]);
-			singleton_skip
-		| Fail (message) ->
-			print_endline (status Red "fail");
-			printf "\n%s%s%s\n\n" (style [Bold]) message (style [Reset]);
-			singleton_fail
-		| failure ->
-			print_endline (status Red "fail");
-			printf "\n%s%s\n%s%s\n"
-				(style [Bold])
-				(Printexc.to_string failure)
-				(Printexc.get_backtrace ())
-				(style [Reset]);
-			singleton_fail
+			| Skip (message) ->
+				display_finish_message Blue "skip";
+				printf "\n%s\n\n" message;
+				singleton_skip
+			| Fail (message) ->
+				display_finish_message Red "fail";
+				printf "\n%s\n\n" message;
+				singleton_fail
+			| failure ->
+				display_finish_message Red "fail";
+				printf "\n%s\n%s\n"
+					(Printexc.to_string failure)
+					(Printexc.get_backtrace ());
+				singleton_fail
 
 	(** Runs the given test suite. *)
 	and run_suite (name, description, tests) =
@@ -182,6 +215,16 @@ let run test =
 	printf "skipped [%s%i%s]\n" (style [Bold]) (                  skipped) (style [Reset]);
 	printf "\n";
 	{passed = passed; failed = failed; skipped = skipped}
+
+let print_endline string =
+	start_debugging ();
+	print_endline string;
+	flush stdout
+
+let print_string string =
+	start_debugging ();
+	print_string string;
+	flush stdout
 
 (* === Factories === *)
 
