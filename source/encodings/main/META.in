@@ -1,0 +1,4 @@
+version = "@VERSION@"
+description = "Character and string encoding (UTF)"
+requires = ""
+archive(native) = "encodings.cmxa"

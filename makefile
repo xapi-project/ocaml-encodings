@@ -1,34 +1,76 @@
-build_command = ocamlbuild -r -no-links -I source -Xs _build,target -cflags -g
+ifdef B_BASE
+    include $(B_BASE)/common.mk
+else
+    MY_OUTPUT_DIR ?= $(CURDIR)/output
+    MY_OBJ_DIR ?= $(CURDIR)/obj
+    OCAML_BUILD_FLAGS = -X $(DESTDIR)
+
+%/.dirstamp :
+	mkdir -p $*
+	touch $@
+
+endif
+
+MODULES = encodings ocamltest
+
+VERSION := $(shell hg parents --template "{rev}" 2>/dev/null || echo 0.0)
+INSTALLDIR := $(shell ocamlfind printconf destdir)
+DESTDIR = $(MY_OBJ_DIR)/output
+
+build_command = ocamlbuild -r -no-links -I source $(OCAML_BUILD_FLAGS) -cflags -g
+install_command = mkdir -p $(DESTDIR)$(INSTALLDIR); \
+		  ocamlfind install -destdir $(DESTDIR)$(INSTALLDIR)
 
 # Build the given target if (and only if) it requires building.
-build = $(build_command) $1
+build = $(build_command) source/$1/main/$(1).cmxa
 
 # Build and test the given target if (and only if) it requires building.
-build_and_test = $(build_command) -nothing-should-be-rebuilt $1 &>/dev/null || $(build_command) $1 --
+build_and_test = $(build_command) -nothing-should-be-rebuilt source/$1/test/$(1)_test.native &>/dev/null || \
+		 $(build_command) source/$1/test/$(1)_test.native --
 
-.PHONY: all build clean target
+# Build the META file needed for install
+build_meta = sed 's,@VERSION@,$(VERSION),g' < source/$(1)/main/META.in > _build/source/$(1)/main/META
 
-all: build
+# Install the given target
+install = $(install_command) $(1) _build/source/$(1)/main/META _build/source/$(1)/main/*.{a,cmx}
 
-clean:
-	rm -rf target
+.PHONY : all clean install
+
+all : $(patsubst %,build-%,$(MODULES))
+
+clean :
+	rm -f *~
 	ocamlbuild -clean
 
-target:
-	mkdir -p target/{main,test}/{bin,doc,lib}
+install : $(patsubst %,install-%,$(MODULES))
 
-build: build-encodings build-ocamltest
+.PHONY : install-pre
+install-pre : $(MY_OBJ_DIR)/.dirstamp
+	rm -rf $(DESTDIR)$(INSTALLDIR)
 
-build-encodings: target
-	$(call build,source/encodings/main/encodings.cmxa)
-	$(call build,source/encodings/test/encodings_test.cmxa)
-	$(call build_and_test,source/encodings/test/encodings_test.native)
-	ln -sf ../../../_build/source/encodings/main/encodings.{a,cmi,cmxa}      target/main/lib/
-	ln -sf ../../../_build/source/encodings/test/encodings_test.{a,cmi,cmxa} target/test/lib/
-	ln -sf ../../../_build/source/encodings/test/encodings_test.native       target/test/bin/
+.PHONY : build-encodings
+build-encodings:
+	$(call build,encodings)
+	$(call build_and_test,encodings)
 
-build-ocamltest: target
-	$(call build,source/ocamltest/main/ocamltest.cmxa)
-	$(call build,source/ocamltest-examples/test/example_test.native)
-	ln -sf ../../../_build/source/ocamltest/main/ocamltest.{a,cmi,cmxa}       target/main/lib/
-	ln -sf ../../../_build/source/ocamltest-examples/test/example_test.native target/test/bin/
+.PHONY : install-encodings
+install-encodings : build-encodings install-pre
+	$(call build_meta,encodings)
+	$(call install,encodings)
+
+.PHONY : build-ocamltest
+build-ocamltest :
+	$(call build,ocamltest)
+
+.PHONY : install-ocamltest
+install-ocamltest : build-ocamltest install-pre
+	$(call build_meta,ocamltest)
+	$(call install,ocamltest)
+
+# This is the target that the Xen build system calls.  It should build
+# everything required for the chroot.
+.PHONY : build
+build : $(MY_OUTPUT_DIR)/ocaml-the-libs.tar.gz
+
+$(MY_OUTPUT_DIR)/ocaml-the-libs.tar.gz : install $(MY_OUTPUT_DIR)/.dirstamp
+	tar -C $(DESTDIR) -c -z -f $@ .
