@@ -25,8 +25,10 @@ install_command = mkdir -p $(DESTDIR)$(INSTALLDIR); \
 build = $(build_command) source/$1/main/$(1).cmxa
 
 # Build and test the given target if (and only if) it requires building.
-build_and_test = $(build_command) -nothing-should-be-rebuilt source/$1/test/$(1)_test.native &>/dev/null || \
-		 $(build_command) source/$1/test/$(1)_test.native --
+build_and_test = if [ -d source/$1/test ]; then \
+		     ($(build_command) -nothing-should-be-rebuilt source/$1/test/$(1)_test.native &>/dev/null || \
+		     $(build_command) source/$1/test/$(1)_test.native -- )\
+		 fi
 
 # Build the META file needed for install
 build_meta = sed 's,@VERSION@,$(VERSION),g' < source/$(1)/main/META.in > _build/source/$(1)/main/META
@@ -48,24 +50,13 @@ install : $(patsubst %,install-%,$(MODULES))
 install-pre : $(MY_OBJ_DIR)/.dirstamp
 	rm -rf $(DESTDIR)$(INSTALLDIR)
 
-.PHONY : build-encodings
-build-encodings:
-	$(call build,encodings)
-	$(call build_and_test,encodings)
+build-% :
+	$(call build,$*)
+	$(call build_and_test,$*)
 
-.PHONY : install-encodings
-install-encodings : build-encodings install-pre
-	$(call build_meta,encodings)
-	$(call install,encodings)
-
-.PHONY : build-ocamltest
-build-ocamltest :
-	$(call build,ocamltest)
-
-.PHONY : install-ocamltest
-install-ocamltest : build-ocamltest install-pre
-	$(call build_meta,ocamltest)
-	$(call install,ocamltest)
+install-% : build-% install-pre
+	$(call build_meta,$*)
+	$(call install,$*)
 
 # This is the target that the Xen build system calls.  It should build
 # everything required for the chroot.
