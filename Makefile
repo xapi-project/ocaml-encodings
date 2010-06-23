@@ -1,14 +1,12 @@
 BUILD_DIR=bin
 
-.PHONY: build_and_install build install clean
-
-build_and_install: build install
+.PHONY: build install clean
 
 build:
 	mkdir -p $(BUILD_DIR)
 	cd $(BUILD_DIR) && cmake $(CURDIR) && make && make package
 
-install:
+install: build
 	cd $(BUILD_DIR) && rpm -i --force *.rpm
 
 clean:
