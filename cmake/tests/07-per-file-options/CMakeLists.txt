@@ -13,7 +13,7 @@ include( UseOCaml )
 
 add_ocaml_file_options( foo
     SOURCES foo.ml
-    OCAMLCOPTS -pp camlp4r
+    OCAMLOPTS -pp camlp4r
     )
 
 add_ocaml_executable( foo

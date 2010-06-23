@@ -12,5 +12,6 @@ include( UseOCaml )
 
 add_ocaml_executable( foo
     SOURCES foo
-    OCAMLOPTS -pp camlp4r
+    OCAMLOPTS -pp camlp4r 
+    OCAMLCOPTS -thread
     )

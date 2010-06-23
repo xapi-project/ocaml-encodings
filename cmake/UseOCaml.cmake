@@ -243,8 +243,8 @@ macro( ocaml_get_dependencies target srcfile dependencies )
     # get dependencies {{{2
     execute_process(
         COMMAND ${CMAKE_OCAML_DEP}
-            ${OCAML_${target}_OCAMLCOPTS}
-            ${OCAML_${target}_PF_${srcname}_OCAMLCOPTS}
+            ${OCAML_${target}_OCAMLOPTS}
+            ${OCAML_${target}_PF_${srcname}_OCAMLOPTS}
             ${dep_arg} ${srcfile}
 
         COMMAND cut -d ":" -f 2-
@@ -383,7 +383,9 @@ macro( ocaml_add_impl_obj target srcfile )
         COMMAND ${CMAKE_OCAML_COMPILER}
             ${include_flags}
             ${package_flags}
+            ${OCAML_${target}_OCAMLOPTS}
             ${OCAML_${target}_OCAMLCOPTS}
+            ${OCAML_${target}_PF_${name}_OCAMLOPTS}
             ${OCAML_${target}_PF_${name}_OCAMLCOPTS}
             -o ${cmo_name}
             -c -impl ${srcfile}
@@ -391,7 +393,9 @@ macro( ocaml_add_impl_obj target srcfile )
         COMMAND ${CMAKE_OCAML_COMPILER_OPT}
             ${include_flags}
             ${package_flags}
+            ${OCAML_${target}_OCAMLOPTS}
             ${OCAML_${target}_OCAMLCOPTS}
+            ${OCAML_${target}_PF_${name}_OCAMLOPTS}
             ${OCAML_${target}_PF_${name}_OCAMLCOPTS}
             -o ${cmo_name}
             -c -impl ${srcfile}
@@ -448,7 +452,9 @@ macro( ocaml_add_intf_obj target srcfile )
         COMMAND ${CMAKE_OCAML_COMPILER}
             ${include_flags}
             ${package_flags}
+            ${OCAML_${target}_OCAMLOPTS}
             ${OCAML_${target}_OCAMLCOPTS}
+            ${OCAML_${target}_PF_${name}_OCAMLOPTS}
             ${OCAML_${target}_PF_${name}_OCAMLCOPTS}
             -o ${output}
             -c -intf ${srcfile}
@@ -590,13 +596,14 @@ macro( add_ocaml_library target )
     #message( STATUS "add_ocaml_library( ${target} )" )
 
     ocaml_parse_arguments( OCAML_${target}
-        "SOURCES;LIBRARIES;PACKAGES;OCAMLCOPTS"
+        "SOURCES;LIBRARIES;PACKAGES;OCAMLOPTS;OCAMLCOPTS"
         ""
         ${ARGN}
         )
     #message( STATUS "   OCAML_${target}_SOURCES:          ${OCAML_${target}_SOURCES}" )
     #message( STATUS "   OCAML_${target}_LIBRARIES:        ${OCAML_${target}_LIBRARIES}" )
     #message( STATUS "   OCAML_${target}_PACKAGES:         ${OCAML_${target}_PACKAGES}" )
+    #message( STATUS "   OCAML_${target}_OCAMLOPTS:        ${OCAML_${target}_OCAMLOPTS}" )
     #message( STATUS "   OCAML_${target}_OCAMLCOPTS:       ${OCAML_${target}_OCAMLCOPTS}" )
 
     ocaml_set_target_deplibs( ${target} )
@@ -919,13 +926,14 @@ macro( add_ocaml_executable target )
     #message( STATUS "add_ocaml_executable( ${target} )" )
 
     ocaml_parse_arguments( OCAML_${target}
-        "SOURCES;LIBRARIES;PACKAGES;OCAMLCOPTS"
+        "SOURCES;LIBRARIES;PACKAGES;OCAMLOPTS;OCAMLCOPTS"
         "RUN_POST_BUILD"
         ${ARGN}
         )
     #message( STATUS "   OCAML_${target}_SOURCES:          ${OCAML_${target}_SOURCES}" )
     #message( STATUS "   OCAML_${target}_LIBRARIES:        ${OCAML_${target}_LIBRARIES}" )
     #message( STATUS "   OCAML_${target}_PACKAGES:         ${OCAML_${target}_PACKAGES}" )
+    #message( STATUS "   OCAML_${target}_OCAMLOPTS:        ${OCAML_${target}_OCAMLOPTS}" )
     #message( STATUS "   OCAML_${target}_OCAMLCOPTS:       ${OCAML_${target}_OCAMLCOPTS}" )
     #message( STATUS "   OCAML_${target}_RUN_POST_BUILD:   ${OCAML_${target}_RUN_POST_BUILD}" )
 
@@ -1125,16 +1133,19 @@ endmacro()
 macro( add_ocaml_file_options target )
     #message( STATUS "add_ocaml_file_options( ${target} )" )
     ocaml_parse_arguments( OCAML_${target}_PF
-        "SOURCES;OCAMLCOPTS"
+        "SOURCES;OCAMLOPTS;OCAMLCOPTS"
         ""
         ${ARGN}
         )
-    message( STATUS "   sources: ${OCAML_${target}_PF_SOURCES}" )
-    message( STATUS "   ocamlopts: ${OCAML_${target}_PF_OCAMLCOPTS}" )
+    #message( STATUS "   sources: ${OCAML_${target}_PF_SOURCES}" )
+    #message( STATUS "   ocamlopts: ${OCAML_${target}_PF_OCAMLOPTS}" )
+    #message( STATUS "   ocamlopts: ${OCAML_${target}_PF_OCAMLCOPTS}" )
 
     foreach( src ${OCAML_${target}_PF_SOURCES} )
+        set( OCAML_${target}_PF_${src}_OCAMLOPTS ${OCAML_${target}_PF_OCAMLOPTS} )
         set( OCAML_${target}_PF_${src}_OCAMLCOPTS ${OCAML_${target}_PF_OCAMLCOPTS} )
-        message( STATUS "   ${src} opts: ${OCAML_${target}_PF_${src}_OCAMLCOPTS}" )
+        #message( STATUS "   ${src} opts: ${OCAML_${target}_PF_${src}_OCAMLOPTS}" )
+        #message( STATUS "   ${src} opts: ${OCAML_${target}_PF_${src}_OCAMLCOPTS}" )
     endforeach()
 endmacro()
 
