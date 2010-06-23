@@ -8,6 +8,13 @@ set( ocaml-libs_VERSION_MINOR 0 )
 find_package( OCaml REQUIRED )
 include( UseOCaml )
 
+execute_process( COMMAND ocamlfind printconf destdir
+    COMMAND sed -e "s,/usr/,,"
+    OUTPUT_VARIABLE OCAML_DESTDIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+set( CMAKE_OCAML_PKGINSTALLDIR ${OCAML_DESTDIR} )
+
 add_subdirectory( source/encodings/main )
 add_subdirectory( source/ocamltest/main )
 add_subdirectory( source/ocamltest-examples/main )
