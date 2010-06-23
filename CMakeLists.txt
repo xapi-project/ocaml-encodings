@@ -3,7 +3,7 @@ set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" )
 
 project( ocaml-libs NONE )
 set( ocaml-libs_VERSION_MAJOR 0 )
-set( ocaml-libs_VERSION_MINOR 0 )
+set( ocaml-libs_VERSION_MINOR 1 )
 
 find_package( OCaml REQUIRED )
 include( UseOCaml )
@@ -15,17 +15,17 @@ execute_process( COMMAND ocamlfind printconf destdir
     )
 set( CMAKE_OCAML_PKGINSTALLDIR ${OCAML_DESTDIR} )
 
-add_subdirectory( source/encodings/main )
-add_subdirectory( source/ocamltest/main )
-add_subdirectory( source/ocamltest-examples/main )
-
-add_subdirectory( source/encodings/test )
-add_subdirectory( source/ocamltest-examples/test )
+# Order with dependencies in mind.
+add_subdirectory( src/encodings )
+add_subdirectory( src/ocamltest )
+add_subdirectory( src/encodings/test )
+add_subdirectory( src/ocamltest-examples )
+add_subdirectory( src/ocamltest-examples/test )
 
 include( InstallRequiredSystemLibraries )
 set( CPACK_PACKAGE_VENDOR "Citrix Systems Ltd." )
 set( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/rpm-extras/License.txt" )
-set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Testing stuff" )
+set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "General OCaml tools and extensions." )
 set( CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm-extras/Description.txt" )
 set( CPACK_PACKAGE_VERSION_MAJOR "${ocaml-libs_VERSION_MAJOR}" )
 set( CPACK_PACKAGE_VERSION_MINOR "${ocaml-libs_VERSION_MINOR}" )
