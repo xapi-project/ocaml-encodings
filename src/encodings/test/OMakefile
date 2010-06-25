@@ -1,0 +1,38 @@
+# targets not related to filenames
+.PHONY: test clean
+
+# use ocamlfind (required for the ocamltest package)
+USE_OCAMLFIND = true
+
+# use the ocamltest package
+OCAMLPACKS[] = ocamltest
+
+# look for dependencies in the super directory
+OCAMLINCLUDES += ..
+
+# use the encodings library in the super directory
+OCAML_LIBS += ../encodings
+
+# ml and mli files required to build this program
+FILES[] = encodings_test
+
+# the meta name of the program
+PROGRAM_NAME = encodings_test
+
+# the program's executable file
+PROGRAM = $(PROGRAM_NAME)$(EXE)
+
+# instructions for creating the executable(s)
+# (PROGRAM_FILES = resulting target filename(s))
+PROGRAM_FILES = $(OCamlProgram $(PROGRAM_NAME), $(FILES))
+
+# run the test (defined below) by default
+.DEFAULT: test
+
+# create and run the executable
+test: $(PROGRAM_FILES)
+  ./$(PROGRAM)
+
+# clean the executable(s) and other intermediate files
+clean:
+  rm -f $(PROGRAM_FILES) $(GENERATED)
