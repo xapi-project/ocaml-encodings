@@ -24,7 +24,7 @@ FILES[] = encodings encodings_private
 LIB_NAME = encodings
 
 # The instructions to build the library file(s).
-# (LIB = the resulting filename(s))
+# (LIB_FILES = the resulting filename(s))
 LIB_FILES = $(OCamlLibrary $(LIB_NAME), $(FILES))
 
 # Build library by default.
