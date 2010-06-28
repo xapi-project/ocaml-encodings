@@ -49,8 +49,3 @@ uninstall:
 # Clean the library and other intermediate files.
 clean:
   rm -f $(GENERATED)
-
-.PHONY: distclean
-
-distclean:
-  rm $(filter-proper-targets $(ls R, .))
