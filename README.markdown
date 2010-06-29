@@ -13,7 +13,7 @@ on Ubuntu. For other operating systems, please refer to the
 the [Findlib homepage](http://projects.camlcity.org/projects/findlib.html).
 
 The unit tests require the
-[ocamltest library](http://github.com/xen-org/ocamltest).
+[OCamlTest library](http://github.com/ocamltest/ocamltest).
 
 Building instructions
 ---------------------
@@ -21,7 +21,7 @@ Run omake in the directory of this README file:
 
     omake
 
-This will also try to run the unit tests. If the ocamltest library is missing,
+This will also try to run the unit tests. If the OCamlTest library is missing,
 encodings will compile, but compiling and running the unit tests will fail.
 Don't panic.
 
