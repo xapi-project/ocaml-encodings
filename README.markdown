@@ -31,6 +31,12 @@ To use the encodings package in your OCaml projects, install it by running:
 
     sudo omake install
 
+Un-installing
+-------------
+To remove the installed encodings OCaml package, run:
+
+    sudo omake uninstall
+
 Documentation
 -------------
 We apologise for not having written any standalone documentation, yet. Please
