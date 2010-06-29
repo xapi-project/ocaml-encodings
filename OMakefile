@@ -1,71 +1,12 @@
-########################################################################
-# Permission is hereby granted, free of charge, to any person
-# obtaining a copy of this file, to deal in the File without
-# restriction, including without limitation the rights to use,
-# copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copies of the File, and to permit persons to whom the
-# File is furnished to do so, subject to the following condition:
-#
-# THE FILE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE FILE OR
-# THE USE OR OTHER DEALINGS IN THE FILE.
+# Targets not related to filenames.
+.PHONY: clean
 
-########################################################################
-# The standard OMakefile.
+# Process OMakefile(s) in the following sub-directories.
+.SUBDIRS: main test
 
-# .PHONY: all install clean
-
-.SUBDIRS: src
-
-# USE_OCAMLFIND = true
-#
-# OCAMLPACKS[] =
-#    pack1
-#    pack2
-#
-# if $(not $(OCAMLFIND_EXISTS))
-#    eprintln(This project requires ocamlfind, but is was not found.)
-#    eprintln(You need to install ocamlfind and run "omake --configure".)
-#    exit 1
-
-# Include path
-#
-# OCAMLINCLUDES +=
-
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = $(not $(OCAMLOPT_EXISTS))
-
-OCAMLFLAGS += -g
-# OCAMLCFLAGS   +=
-# OCAMLOPTFLAGS +=
-# OCAML_LINK_FLAGS +=
-# OCAML_BYTE_LINK_FLAGS +=
-# OCAML_NATIVE_LINK_FLAGS +=
-
-# FILES[] =
-#    file1
-#    file2
-#
-# LIB = main
-#
-# .DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
-
-################################################
-# Build an OCaml program
-#
-
-# FILES[] =
-#    file1
-#    file2
-#
-# PROGRAM =
-# OCAML_LIBS +=
-# OCAML_CLIBS +=
-# OCAML_OTHER_LIBS +=
-# OCAML_LIB_FLAGS +=
-#
-# .DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+# Delete OMake cache files.
+# (Cannot delete the .omakedb and omakedb.lock files
+#  from within omake. Currently just hiding them from
+#  version control.)
+clean:
+  rm -f *.omc

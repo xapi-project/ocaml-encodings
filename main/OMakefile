@@ -4,27 +4,15 @@ VERSION = 0.1
 # Targets not related to filenames.
 .PHONY: install uninstall clean
 
-# The generated, OMake-related files.
-# (Cannot delete the .omakedb from within omake.
-#  Probably better to hide these files from hg/git,
-#  rather than deleting them.)
-OMAKE_GENERATED=*.{omc} .omakedb .omakedb.lock
-
-# The generated, non-OMake-related files.
-OTHER_GENERATED=*.{a,cmi,cmx,cmxa,o,opt} META
-
-# All generated files (used for the 'clean' target).
-GENERATED=$(OTHER_GENERATED)   # $(OMAKE_GENERATED)
+# The meta name of the library.
+LIB_NAME = encodings
 
 # The ml and mli files required to build the library.
-FILES[] = ocamltest
-
-# The meta name of the library.
-LIB_NAME = ocamltest
+SRC_FILES[] = encodings encodings_private
 
 # The instructions to build the library file(s).
 # (LIB_FILES = the resulting filename(s))
-LIB_FILES = $(OCamlLibrary $(LIB_NAME), $(FILES))
+LIB_FILES = $(OCamlLibrary $(LIB_NAME), $(SRC_FILES))
 
 # The directory where the library will be installed.
 DEST_DIR = $(shell ocamlfind printconf destdir)
@@ -36,16 +24,16 @@ META: META.in
 # Install the library into the default location.
 # (Default location is `ocamlfind printconf destdir`.)
 install: $(LIB_FILES) META
-  ocamlfind install -ldconf ignore $(LIB_NAME) $^
+  ocamlfind install -ldconf ignore $(LIB_NAME) $(LIB_NAME).{a,cmi,cmx,cmxa,o} META
 
 # Uninstall the library from the default location.
 # (Default location is `ocamlfind printconf destdir`.)
 uninstall:
-  ocamlfind remove ocamltest
+  ocamlfind remove $(LIB_NAME)
 
 # Only build (do not install) the library by default.
 .DEFAULT: $(LIB_FILES)
 
-# Clean the library and other intermediate files.
+# Delete the library and other intermediate files.
 clean:
-  rm -f $(GENERATED)
+  rm -f *.{a,cmi,cmx,cmxa,o,omc} META

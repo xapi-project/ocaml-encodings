@@ -5,13 +5,13 @@
 USE_OCAMLFIND = true
 
 # use the ocamltest package
-OCAMLPACKS[] = # ocamltest
+OCAMLPACKS[] = ocamltest
 
 # look for dependencies in the super directory
-OCAMLINCLUDES += ..
+OCAMLINCLUDES += ../main
 
 # use the encodings library in the super directory
-OCAML_LIBS += ../encodings ocamltest
+OCAML_LIBS += ../main/encodings
 
 # ml and mli files required to build this program
 FILES[] = encodings_test
@@ -35,4 +35,4 @@ test: $(PROGRAM_FILES)
 
 # clean the executable(s) and other intermediate files
 clean:
-  rm -f $(PROGRAM_FILES) $(GENERATED)
+  rm -f $(PROGRAM_FILES) *.{cmi,cmx,o,omc}
