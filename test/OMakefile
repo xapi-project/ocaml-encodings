@@ -1,38 +1,38 @@
-# targets not related to filenames
+# Targets not related to filenames.
 .PHONY: test clean
 
-# use ocamlfind (required for the ocamltest package)
+# Use ocamlfind (required for locating the packages).
 USE_OCAMLFIND = true
 
-# use the ocamltest package
+# The OCaml packages to use.
 OCAMLPACKS[] = ocamltest
 
-# look for dependencies in the super directory
-OCAMLINCLUDES += ../main
-
-# use the encodings library in the super directory
+# The dependencies on OCaml libraries used.
 OCAML_LIBS += ../main/encodings
 
-# ml and mli files required to build this program
+# The directories to include for source lookup.
+OCAMLINCLUDES += ../main
+
+# The ml and mli files required to build the library.
 FILES[] = encodings_test
 
-# the meta name of the program
+# The meta name of the program.
 PROGRAM_NAME = encodings_test
 
-# the program's executable file
+# The program's executable file(s).
 PROGRAM = $(PROGRAM_NAME)$(EXE)
 
-# instructions for creating the executable(s)
+# The instructions for creating the executable(s).
 # (PROGRAM_FILES = resulting target filename(s))
 PROGRAM_FILES = $(OCamlProgram $(PROGRAM_NAME), $(FILES))
 
-# run the test (defined below) by default
-.DEFAULT: test
-
-# create and run the executable
+# Build and execute the test.
 test: $(PROGRAM_FILES)
   ./$(PROGRAM)
 
-# clean the executable(s) and other intermediate files
+# Build and execute the test by default.
+.DEFAULT: test
+
+# Delete the library and other intermediate files.
 clean:
   rm -f $(PROGRAM_FILES) *.{cmi,cmx,o,omc}
