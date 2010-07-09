@@ -2,7 +2,7 @@
 VERSION = 0.1
 
 # Targets not related to filenames.
-.PHONY: ../test install uninstall clean
+.PHONY: build install uninstall clean
 
 # The meta name of the library.
 LIB_NAME = ocaml-encodings
@@ -31,8 +31,11 @@ install: $(LIB_FILES) META
 uninstall:
   ocamlfind remove $(LIB_NAME)
 
+# Build the library.
+build: $(LIB_FILES)
+
 # Only build (do not install) the library by default.
-.DEFAULT: $(LIB_FILES)
+.DEFAULT: build
 
 # Delete the library and other intermediate files.
 clean:
