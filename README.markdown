@@ -14,7 +14,7 @@ on Ubuntu. For other operating systems, please refer to the
 the [Findlib homepage](http://projects.camlcity.org/projects/findlib.html).
 
 The unit tests require the
-[OCamlTest library](http://github.com/ocamltest/ocamltest). Note that this
+[OCamlTest library](http://github.com/xen-org/ocamltest). Note that this
 is not required for installation.
 
 Building instructions
