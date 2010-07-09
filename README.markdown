@@ -1,10 +1,11 @@
-encodings
-=========
+ocaml-encodings
+===============
 Character and string encoding (UTF) library for OCaml.
 
 Building pre-requisites
 -----------------------
-encodings requires OMake and ocamlfind to build. You can install both with
+ocaml-encodings requires OMake and ocamlfind to build. You can install both
+with
 
     sudo aptitude install omake ocaml-findlib
 
@@ -13,27 +14,33 @@ on Ubuntu. For other operating systems, please refer to the
 the [Findlib homepage](http://projects.camlcity.org/projects/findlib.html).
 
 The unit tests require the
-[OCamlTest library](http://github.com/ocamltest/ocamltest).
+[OCamlTest library](http://github.com/ocamltest/ocamltest). Note that this
+is not required for installation.
 
 Building instructions
 ---------------------
-Run omake in the directory of this README file:
+If you simply want to install this library, please skip to the next section.
+
+To build the library, run omake in the directory of this README file:
 
     omake
 
 This will also try to run the unit tests. If the OCamlTest library is missing,
-encodings will compile, but compiling and running the unit tests will fail.
-Don't panic.
+ocaml-encodings will compile, but compiling and running the unit tests will
+fail.
 
 Installation
 ------------
-To use the encodings package in your OCaml projects, install it by running:
+To (build and) install the ocaml-encodings library, run:
 
     sudo omake install
 
+Note that running just this command bypasses the unit tests (which require the
+OCamlTest library).
+
 Un-installing
 -------------
-To remove the installed encodings OCaml package, run:
+To remove the installed ocaml-encodings OCaml package, run:
 
     sudo omake uninstall
 

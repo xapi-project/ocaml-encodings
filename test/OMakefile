@@ -8,7 +8,7 @@ USE_OCAMLFIND = true
 OCAMLPACKS[] = ocamltest
 
 # The dependencies on OCaml libraries used.
-OCAML_LIBS += ../main/encodings
+OCAML_LIBS += ../main/ocaml-encodings
 
 # The directories to include for source lookup.
 OCAMLINCLUDES += ../main

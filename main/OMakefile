@@ -2,10 +2,10 @@
 VERSION = 0.1
 
 # Targets not related to filenames.
-.PHONY: install uninstall clean
+.PHONY: ../test install uninstall clean
 
 # The meta name of the library.
-LIB_NAME = encodings
+LIB_NAME = ocaml-encodings
 
 # The ml and mli files required to build the library.
 SRC_FILES[] = encodings encodings_private
@@ -24,7 +24,7 @@ META: META.in
 # Install the library into the default location.
 # (Default location is `ocamlfind printconf destdir`.)
 install: $(LIB_FILES) META
-  ocamlfind install -ldconf ignore $(LIB_NAME) $(LIB_NAME).{a,cmi,cmx,cmxa,o} META
+  ocamlfind install -ldconf ignore $(LIB_NAME) $(LIB_FILES) META
 
 # Uninstall the library from the default location.
 # (Default location is `ocamlfind printconf destdir`.)
